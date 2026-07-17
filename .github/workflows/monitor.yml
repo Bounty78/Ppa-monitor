@@ -1,0 +1,47 @@
+name: PPA Dispatch Monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 minutes (GitHub may stretch this to ~10)
+  workflow_dispatch: {}      # allows manual "Run workflow" button for testing
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ppa-monitor
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run monitor
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        run: python monitor.py
+
+      - name: Save state back to repository
+        run: |
+          git config user.name "ppa-monitor-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add state.json
+          if git diff --cached --quiet; then
+            echo "No state changes to commit."
+          else
+            git commit -m "Update monitor state [skip ci]"
+            git pull --rebase origin ${GITHUB_REF_NAME} || true
+            git push
+          fi
