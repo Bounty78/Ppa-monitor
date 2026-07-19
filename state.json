@@ -582,10 +582,12 @@
   73798,
   73792,
   73788,
-  73803
+  73803,
+  73804
  ],
  "watched": [
   "AGE",
+  "AGW",
   "AS3",
   "BCS",
   "CG2",
@@ -620,6 +622,6 @@
   "PIN>KRT1",
   "TPL>KRT1"
  ],
- "tg_offset": 682746615,
+ "tg_offset": 682746618,
  "initialized": true
 }
